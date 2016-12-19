@@ -763,46 +763,50 @@ class simple_html_dom_node
     // PaperG - Function to convert the text from one character set to another if the two sets are not the same.
     function convert_text($text)
     {
-        global $debugObject;
-        if (is_object($debugObject)) {$debugObject->debugLogEntry(1);}
+	try {
+		global $debugObject;
+		if (is_object($debugObject)) {$debugObject->debugLogEntry(1);}
 
-        $converted_text = $text;
+		$converted_text = $text;
 
-        $sourceCharset = "";
-        $targetCharset = "";
+		$sourceCharset = "";
+		$targetCharset = "";
 
-        if ($this->dom)
-        {
-            $sourceCharset = strtoupper($this->dom->_charset);
-            $targetCharset = strtoupper($this->dom->_target_charset);
-        }
-        if (is_object($debugObject)) {$debugObject->debugLog(3, "source charset: " . $sourceCharset . " target charaset: " . $targetCharset);}
+		if ($this->dom)
+		{
+		    $sourceCharset = strtoupper($this->dom->_charset);
+		    $targetCharset = strtoupper($this->dom->_target_charset);
+		}
+		if (is_object($debugObject)) {$debugObject->debugLog(3, "source charset: " . $sourceCharset . " target charaset: " . $targetCharset);}
 
-        if (!empty($sourceCharset) && !empty($targetCharset) && (strcasecmp($sourceCharset, $targetCharset) != 0))
-        {
-            // Check if the reported encoding could have been incorrect and the text is actually already UTF-8
-            if ((strcasecmp($targetCharset, 'UTF-8') == 0) && ($this->is_utf8($text)))
-            {
-                $converted_text = $text;
-            }
-            else
-            {
-                $converted_text = iconv($sourceCharset, $targetCharset, $text);
-            }
-        }
+		if (!empty($sourceCharset) && !empty($targetCharset) && (strcasecmp($sourceCharset, $targetCharset) != 0))
+		{
+		    // Check if the reported encoding could have been incorrect and the text is actually already UTF-8
+		    if ((strcasecmp($targetCharset, 'UTF-8') == 0) && ($this->is_utf8($text)))
+		    {
+			$converted_text = $text;
+		    }
+		    else
+		    {
+			$converted_text = iconv($sourceCharset, $targetCharset, $text);
+		    }
+		}
 
-        // Lets make sure that we don't have that silly BOM issue with any of the utf-8 text we output.
-        if ($targetCharset == 'UTF-8')
-        {
-            if (substr($converted_text, 0, 3) == "\xef\xbb\xbf")
-            {
-                $converted_text = substr($converted_text, 3);
-            }
-            if (substr($converted_text, -3) == "\xef\xbb\xbf")
-            {
-                $converted_text = substr($converted_text, 0, -3);
-            }
-        }
+		// Lets make sure that we don't have that silly BOM issue with any of the utf-8 text we output.
+		if ($targetCharset == 'UTF-8')
+		{
+		    if (substr($converted_text, 0, 3) == "\xef\xbb\xbf")
+		    {
+			$converted_text = substr($converted_text, 3);
+		    }
+		    if (substr($converted_text, -3) == "\xef\xbb\xbf")
+		    {
+			$converted_text = substr($converted_text, 0, -3);
+		    }
+		}
+	} catch (ErrorException $ex) {
+		return '';	
+	}
 
         return $converted_text;
     }
